@@ -1,71 +1,50 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Path;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class Task01 {
-    public static String removePunctuations(String source) {
-        return source.replaceAll("\\p{Punct}|\\p{Space}", " ");
-    }
-
+    
     public static void main(String[] args){
 
         //Variables declaration & initialisation
-        String source=null;
         String str = args[0];
         System.out.println(str);
-        String line;
-        String updatedString;
-        int count = 0, maxCount = 0;    
-        ArrayList<String> words = new ArrayList<String>();    
+          
+        String fileName = str;
+        readFile(fileName);
+    }
         
-        // Coding begins
-        Path path = Paths.get(str);
-        File file = path.toFile();
-        
-        try {
-            // Open the given file
-            
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
+        private static void readFile(String fileName) {
+            List<String> listString = new ArrayList<>();
+            StringBuilder stringBuilder = new StringBuilder();
+            String[] listOfWords = null;
+            try {
+                try (Stream<String> stream = Files.lines(Paths.get(fileName)))
+                 {     
+                   stream.map(list -> list.replaceAll("\\p{P}", "")).forEach(list -> stringBuilder.append(list).append("\n"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+    
+                listOfWords = stringBuilder.toString().split(" ");
+                listString = Arrays.stream(listOfWords).collect(Collectors.toList());
+                Map<String, Long> listOfWordWithCount = listString.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-       //Stripping off punctuations & ignoring case of words
-            while(null!=(line=br.readLine())){
-              // line.toUpperCase();
-              // updatedString  = removePunctuations(line);
-               //System.out.println(updatedString);
-              // updatedString.toLowerCase();    
-               String string[] = line.toLowerCase().split("([,.:!-{}'\\s]+) ");   
-               for (int i=0;i<string.length;i++){
-               System.out.println(string[i]) ;}
-                //Adding all words generated in previous step into words    
-                for(String s : string){    
-                words.add(s); 
-                }    
-                for(int i = 0; i < words.size(); i++){    
-                count = 1;    
-                //Count each word in the file and store it in variable count    
-                for(int j = i+1; j < words.size(); j++){    
-                    if(words.get(i).equals(words.get(j))){    
-                        count++;    
-                    }     
-                }    
-                    }
-            
-                //closing the readers  
-                        br.close();
-                        fr.close();
-
+                Stream<Entry<String, Long>> listOfWordWithReverseOrder =  listOfWordWithCount.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(10);
+                listOfWordWithReverseOrder.forEach(System.out::println);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }catch(IOException e){
-                System.out.println("Something went wrong");
-                    }
+    
            
     
 
